@@ -17,15 +17,15 @@ public:
         _prev(std::set<Value *>(children.begin(), children.end())), _op(op) {}
 
   // addition
-  friend Value operator+(const Value &lhs, const Value &rhs) {
+  friend Value operator+(const Value lhs, const Value rhs) {
     return Value(lhs.data + rhs.data);
   }
 
-  friend Value operator+(const Value &lhs, double rhs) {
+  friend Value operator+(const Value lhs, double rhs) {
     return Value(lhs.data + rhs);
   }
 
-  friend Value operator+(double lhs, const Value &rhs) {
+  friend Value operator+(double lhs, const Value rhs) {
     return Value(lhs + rhs.data);
   }
 
@@ -42,11 +42,11 @@ public:
   }
 
   // subtraction
-  friend Value operator-(const Value &lhs, Value &rhs) { return lhs + (-rhs); }
+  friend Value operator-(const Value lhs, Value rhs) { return lhs + (-rhs); }
 
-  friend Value operator-(const Value &lhs, double rhs) { return lhs + (-rhs); }
+  friend Value operator-(const Value lhs, double rhs) { return lhs + (-rhs); }
 
-  friend Value operator-(double lhs, Value &rhs) { return Value(lhs) - rhs; }
+  friend Value operator-(double lhs, Value rhs) { return Value(lhs) - rhs; }
 
   friend Value operator-=(Value &lhs, const Value &rhs) {
     Value out(lhs.data - rhs.data);
@@ -61,21 +61,21 @@ public:
   }
 
   // multiplication
-  friend Value operator*(Value &lhs, Value &rhs) {
+  friend Value operator*(Value lhs, Value rhs) {
     Value out(lhs.data * rhs.data, {&lhs, &rhs}, "*");
-    out._backward = [&]() {
-      lhs.grad += out.grad * rhs.data;
-      rhs.grad += out.grad * lhs.data;
+    out._backward = [&lhs, &rhs, out_grad = out.grad]() {
+      lhs.grad += out_grad * rhs.data;
+      rhs.grad += out_grad * lhs.data;
     };
     return out;
   }
 
-  friend Value operator*(Value &lhs, double rhs) {
+  friend Value operator*(Value lhs, double rhs) {
     Value other(rhs);
     return lhs * other;
   }
 
-  friend Value operator*(double lhs, Value &rhs) { return rhs * lhs; }
+  friend Value operator*(double lhs, Value rhs) { return rhs * lhs; }
 
   friend Value operator*=(Value &lhs, const Value &rhs) {
     Value out(lhs.data * rhs.data);
@@ -92,8 +92,8 @@ public:
   // power
   friend Value pow(Value &lhs, double rhs) {
     Value out(std::pow(lhs.data, rhs), {&lhs}, "**" + std::to_string(rhs));
-    out._backward = [&]() {
-      lhs.grad += out.grad * rhs * std::pow(lhs.data, rhs - 1);
+    out._backward = [&lhs, rhs, out_grad = out.grad]() {
+      lhs.grad += out_grad * rhs * std::pow(lhs.data, rhs - 1);
     };
     return out;
   }
@@ -101,7 +101,9 @@ public:
   // ReLU
   Value relu() {
     Value out(std::max(0.0, data), {this}, "ReLU");
-    out._backward = [&]() { grad += out.grad * (data > 0); };
+    out._backward = [this, out_grad = out.grad]() {
+      this->grad += out_grad * (this->data > 0);
+    };
     return out;
   }
 
@@ -135,18 +137,18 @@ public:
   }
 
   // division
-  friend Value operator/(Value &lhs, Value &rhs) {
+  friend Value operator/(Value lhs, Value rhs) {
     Value out = pow(rhs, -1.0);
     return lhs * out;
   }
 
-  friend Value operator/(Value &lhs, double rhs) {
+  friend Value operator/(Value lhs, double rhs) {
     Value out(lhs.data / rhs);
     lhs.grad += out.grad * std::pow(rhs, -1);
     return out;
   }
 
-  friend Value operator/(double lhs, Value &rhs) {
+  friend Value operator/(double lhs, Value rhs) {
     Value temp(lhs);
     return temp / rhs;
   }
