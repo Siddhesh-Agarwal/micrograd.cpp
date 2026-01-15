@@ -6,62 +6,58 @@
 
 class Value {
 public:
-  std::function<void()> _backward;
-  std::set<Value *> _prev;
-  std::string _op;
   double data;
   double grad;
+  std::string _op;
+  std::set<Value *> _prev;
+  std::function<void()> _backward;
 
   Value(double data, std::vector<Value *> children = {}, std::string op = "")
       : data(data), grad(0.0), _backward(nullptr),
         _prev(std::set<Value *>(children.begin(), children.end())), _op(op) {}
 
   // addition
-  friend Value operator+(const Value lhs, const Value rhs) {
+  friend Value operator+(const Value &lhs, const Value &rhs) {
     return Value(lhs.data + rhs.data);
   }
 
-  friend Value operator+(const Value lhs, double rhs) {
+  friend Value operator+(const Value &lhs, double rhs) {
     return Value(lhs.data + rhs);
   }
 
-  friend Value operator+(double lhs, const Value rhs) {
+  friend Value operator+(double lhs, const Value &rhs) {
     return Value(lhs + rhs.data);
   }
 
   friend Value operator+=(Value &lhs, const Value &rhs) {
-    Value out(lhs.data + rhs.data);
-    lhs.data = out.data;
-    return out;
+    lhs.data += rhs.data;
+    return lhs;
   }
 
   friend Value operator+=(Value &lhs, double rhs) {
-    Value out(lhs.data + rhs);
-    lhs.data = out.data;
-    return out;
+    lhs.data += rhs;
+    return lhs;
   }
 
   // subtraction
-  friend Value operator-(const Value lhs, Value rhs) { return lhs + (-rhs); }
+  friend Value operator-(const Value &lhs, Value &rhs) { return lhs + (-rhs); }
 
-  friend Value operator-(const Value lhs, double rhs) { return lhs + (-rhs); }
+  friend Value operator-(const Value &lhs, double rhs) { return lhs + (-rhs); }
 
-  friend Value operator-(double lhs, Value rhs) { return Value(lhs) - rhs; }
+  friend Value operator-(double lhs, Value &rhs) { return Value(lhs) - rhs; }
 
   friend Value operator-=(Value &lhs, const Value &rhs) {
-    Value out(lhs.data - rhs.data);
-    lhs.data = out.data;
-    return out;
+    lhs.data -= rhs.data;
+    return lhs;
   }
 
   friend Value operator-=(Value &lhs, double rhs) {
-    Value out(lhs.data - rhs);
-    lhs.data = out.data;
-    return out;
+    lhs.data -= rhs;
+    return lhs;
   }
 
   // multiplication
-  friend Value operator*(Value lhs, Value rhs) {
+  friend Value operator*(Value &lhs, Value &rhs) {
     Value out(lhs.data * rhs.data, {&lhs, &rhs}, "*");
     out._backward = [&lhs, &rhs, out_grad = out.grad]() {
       lhs.grad += out_grad * rhs.data;
@@ -70,23 +66,21 @@ public:
     return out;
   }
 
-  friend Value operator*(Value lhs, double rhs) {
+  friend Value operator*(Value &lhs, double rhs) {
     Value other(rhs);
     return lhs * other;
   }
 
-  friend Value operator*(double lhs, Value rhs) { return rhs * lhs; }
+  friend Value operator*(double lhs, Value &rhs) { return rhs * lhs; }
 
   friend Value operator*=(Value &lhs, const Value &rhs) {
-    Value out(lhs.data * rhs.data);
-    lhs.data = out.data;
-    return out;
+    lhs.data *= rhs.data;
+    return lhs;
   }
 
   friend Value operator*=(Value &lhs, double rhs) {
-    Value out(lhs.data * rhs);
-    lhs.data = out.data;
-    return out;
+    lhs.data *= rhs;
+    return lhs;
   }
 
   // power
@@ -137,31 +131,31 @@ public:
   }
 
   // division
-  friend Value operator/(Value lhs, Value rhs) {
+  friend Value operator/(Value &lhs, Value &rhs) {
     Value out = pow(rhs, -1.0);
     return lhs * out;
   }
 
-  friend Value operator/(Value lhs, double rhs) {
+  friend Value operator/(Value &lhs, double rhs) {
     Value out(lhs.data / rhs);
     lhs.grad += out.grad * std::pow(rhs, -1);
     return out;
   }
 
-  friend Value operator/(double lhs, Value rhs) {
+  friend Value operator/(double lhs, Value &rhs) {
     Value temp(lhs);
     return temp / rhs;
   }
 
   friend Value operator/=(Value &lhs, const Value &rhs) {
-    Value out(lhs.data / rhs.data);
-    lhs.grad += out.grad * (1.0 / rhs.data);
-    return out;
+    lhs.data /= rhs.data;
+    lhs.grad += lhs.grad * (1.0 / rhs.data);
+    return lhs;
   }
 
   friend Value operator/=(Value &lhs, double rhs) {
-    Value out(lhs.data / rhs);
-    lhs.grad += out.grad * (1.0 / rhs);
-    return out;
+    lhs.data /= rhs;
+    lhs.grad += lhs.grad * (1.0 / rhs);
+    return lhs;
   }
 };
