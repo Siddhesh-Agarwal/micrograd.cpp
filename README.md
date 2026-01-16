@@ -8,3 +8,12 @@ A C++ version of [Andrej Karpathy's micrograd library](https://github.com/karpat
 The file contains 2 header files:
 1. [nn.hpp](./include/nn.hpp): Contains the neural network implementation. Equivalent to the [micrograd/nn.py](https://github.com/karpathy/micrograd/blob/master/micrograd/nn.py) file in the original repository.
 2. [engine.hpp](./include/engine.hpp): Contains the engine implementation. Equivalent to the [micrograd/engine.py](https://github.com/karpathy/micrograd/blob/master/micrograd/engine.py) file in the original repository.
+
+## Usage
+
+To use the library, simply include the header files in your project and link against the library.
+
+```cpp
+#include <micrograd/nn.hpp>
+#include <micrograd/engine.hpp>
+```
