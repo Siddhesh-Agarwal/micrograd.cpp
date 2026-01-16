@@ -1,4 +1,4 @@
-#include "../include/micrograd/nn.hpp"
+#include <micrograd/nn.hpp>
 #include <iostream>
 #include <vector>
 

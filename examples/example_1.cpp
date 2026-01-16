@@ -1,4 +1,4 @@
-#include "../include/micrograd/engine.hpp"
+#include <micrograd/engine.hpp>
 #include <iostream>
 
 int main() {
