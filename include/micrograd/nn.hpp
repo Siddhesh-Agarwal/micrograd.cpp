@@ -12,7 +12,7 @@ inline double uniform_rand(double lower, double upper) {
 class Module {
   void zero_grad() {
     for (auto &param : parameters()) {
-      param.grad = 0.0;
+      param->grad = 0.0;
     }
   }
 

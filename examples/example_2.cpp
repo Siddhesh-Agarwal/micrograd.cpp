@@ -13,9 +13,9 @@ int main() {
     auto y2 = n2(x);
     auto y3 = n3(x);
 
-    std::cout << "y1.data: " << y1.data << std::endl;
-    std::cout << "y2.data: " << y2.data << std::endl;
-    std::cout << "y3.data: " << y3.data << std::endl;
+    std::cout << "y1.data: " << y1->data << std::endl;
+    std::cout << "y2.data: " << y2->data << std::endl;
+    std::cout << "y3.data: " << y3->data << std::endl;
 
     return 0;
 }
