@@ -39,6 +39,36 @@ Since this is a header-only library, you can simply copy the `include/micrograd`
 #include <micrograd/nn.hpp>
 ```
 
+## Building
+
+This project uses CMake to build examples.
+
+### Prerequisites
+
+- CMake 3.14 or higher
+- A C++17 compatible compiler
+
+### Build Steps
+
+```bash
+# Create a build directory
+mkdir build && cd build
+
+# Configure the project
+cmake ..
+
+# Build the project
+cmake --build .
+
+# Run examples
+./examples/demo    # Demo example
+./examples/nn_train # Neural network training example
+```
+
+### CMake Options
+
+- `MICROGRAD_BUILD_EXAMPLES`: Set to `OFF` to disable building examples (default: `ON`)
+
 ## Usage
 
 The following example demonstrates building a computational graph and performing backpropagation, matching the canonical example from the original micrograd:
