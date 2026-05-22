@@ -27,7 +27,7 @@ public:
 
   Neuron(int nin, bool nonlin = true)
       : bias(Value(0.0)), nonlin(nonlin) {
-    for (unsigned int i = 0; i < nin; i++) {
+    for (int i = 0; i < nin; i++) {
       weights.push_back(Value(uniform_rand(-1.0, 1.0)));
     }
   }

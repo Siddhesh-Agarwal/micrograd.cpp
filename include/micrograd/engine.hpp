@@ -8,7 +8,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <iostream>
 
 struct ValueImpl {
   double data;
@@ -19,7 +18,7 @@ struct ValueImpl {
 
   ValueImpl(double data, std::vector<std::shared_ptr<ValueImpl>> children = {},
             std::string op = "")
-      : data(data), grad(0.0), _prev(children), _op(op) {}
+      : data(data), grad(0.0), _op(op), _prev(children) {}
 };
 
 class Value {
@@ -41,7 +40,7 @@ public:
     Value out(std::make_shared<ValueImpl>(
         lhs->data + rhs->data,
         std::vector<std::shared_ptr<ValueImpl>>{lhs.impl, rhs.impl}, "+"));
-    
+
     out.impl->_backward = [l = lhs.impl, r = rhs.impl](ValueImpl *out_node) {
       l->grad += out_node->grad;
       r->grad += out_node->grad;
@@ -53,7 +52,7 @@ public:
     Value out(std::make_shared<ValueImpl>(
         lhs->data + rhs,
         std::vector<std::shared_ptr<ValueImpl>>{lhs.impl}, "+"));
-        
+
     out.impl->_backward = [l = lhs.impl](ValueImpl *out_node) {
       l->grad += out_node->grad;
     };
@@ -96,7 +95,7 @@ public:
     Value out(std::make_shared<ValueImpl>(
         lhs->data * rhs->data,
         std::vector<std::shared_ptr<ValueImpl>>{lhs.impl, rhs.impl}, "*"));
-        
+
     out.impl->_backward = [l = lhs.impl, r = rhs.impl](ValueImpl *out_node) {
       l->grad += out_node->grad * r->data;
       r->grad += out_node->grad * l->data;
@@ -132,7 +131,7 @@ public:
   friend Value operator/(double lhs, const Value &rhs) {
     return Value(lhs) / rhs;
   }
-  
+
   friend Value operator/=(Value &lhs, const Value &rhs) {
       lhs = lhs / rhs;
       return lhs;
@@ -149,19 +148,19 @@ public:
         std::pow(lhs->data, rhs),
         std::vector<std::shared_ptr<ValueImpl>>{lhs.impl},
         "**" + std::to_string(rhs)));
-        
+
     out.impl->_backward = [l = lhs.impl, rhs](ValueImpl *out_node) {
       l->grad += out_node->grad * rhs * std::pow(l->data, rhs - 1);
     };
     return out;
   }
-  
+
   // exponentiation
   friend Value exp(const Value &lhs) {
     Value out(std::make_shared<ValueImpl>(
         std::exp(lhs->data),
         std::vector<std::shared_ptr<ValueImpl>>{lhs.impl}, "exp"));
-        
+
     out.impl->_backward = [l = lhs.impl](ValueImpl *out_node) {
       l->grad += out_node->grad * out_node->data; // derivative of exp(x) is exp(x) (which is out->data)
     };
@@ -173,7 +172,7 @@ public:
     Value out(std::make_shared<ValueImpl>(
         std::max(0.0, impl->data),
         std::vector<std::shared_ptr<ValueImpl>>{impl}, "ReLU"));
-        
+
     out.impl->_backward = [ptr = impl](ValueImpl *out_node) {
       ptr->grad += out_node->grad * (out_node->data > 0);
     };
@@ -187,7 +186,7 @@ public:
   void backward() {
     std::set<ValueImpl *> visited;
     std::vector<ValueImpl *> topo;
-    
+
     std::function<void(ValueImpl *)> build_topo = [&](ValueImpl *node) {
       if (visited.find(node) != visited.end())
         return;
@@ -198,9 +197,9 @@ public:
     };
 
     build_topo(impl.get());
-    
+
     impl->grad = 1.0;
-    
+
     for (auto it = topo.rbegin(); it != topo.rend(); ++it) {
       if ((*it)->_backward) {
         (*it)->_backward(*it);
